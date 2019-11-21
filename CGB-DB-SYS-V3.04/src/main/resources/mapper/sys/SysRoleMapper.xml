@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cy.pj.sys.dao.SysRoleDao">
+  
+   <update id="updateObject"
+           parameterType="com.cy.pj.sys.entity.SysRole">
+         update sys_roles
+         set
+           name=#{name},
+           note=#{note},
+           modifiedUser=#{modifiedUser},
+           modifiedTime=now()
+        where id=#{id}
+   </update>
+   <!-- 
+        基于角色id查询角色以及角色对应的菜单id数据
+    1)resultMap表示结果映射,一般在使用自定义映射方式
+        时,会使用resultMap ;
+    2)collection 元素一般用于one2many查询 
+           在当前应用中是基于角色id查询菜单id并将查询结果
+           封装到SysRoleMenuVo的menuIds属性上-->
+   <!-- 方案1:数据层嵌套查询 -->
+   <!-- 
+   <resultMap type="com.cy.pj.sys.vo.SysRoleMenuVo" 
+              id="sysRoleMenuVo">
+           <id property="id" column="id"/>
+           <collection property="menuIds"
+                       column="id"
+                       select="com.cy.pj.sys.dao.SysRoleMenuDao.findMenuIdsByRoleId">
+           </collection>
+   </resultMap>
+   <select id="findObjectById"
+           resultMap="sysRoleMenuVo">
+         select id,name,note
+         from sys_roles 
+         where id=#{id}       
+   </select>
+   -->
+   <!-- 基于角色id查询角色以及角色对应的菜单id数据
+       方案2:数据层多表查询 -->
+   <resultMap type="com.cy.pj.sys.vo.SysRoleMenuVo"
+              id="sysRoleMenuVo">
+        <id property="id" column="id"/>  
+        <result property="name" column="name"/>
+        <result property="note" column="note"/>
+        <collection property="menuIds"
+                    javaType="list"
+                    ofType="int">
+             <id column="menu_id"/>  
+        </collection>
+   </resultMap>
+   <select id="findObjectById"
+           resultMap="sysRoleMenuVo">
+         select r.id,r.name,r.note,rm.menu_id
+         from sys_roles r left join sys_role_menus rm
+         on r.id=rm.role_id
+         where r.id=#{id}       
+   </select>
+   <!-- 写角色自身信息
+    useGeneratedKeys:表示使用insert操作对应的自增主键值
+    keyProperty:表示将自增主键值赋值给参数对象的哪个属性-->
+    <insert id="insertObject"
+           parameterType="com.cy.pj.sys.entity.SysRole"
+           useGeneratedKeys="true"
+           keyProperty="id">
+       insert into sys_roles
+       (name,note,createdUser,createdTime,modifiedUser,modifiedTime)
+       values
+       (#{name},#{note},#{createdUser},now(),#{modifiedUser},now())        
+    </insert>
+   <!-- 假如主键值是自己定义的一个随机数 -->
+   <!-- 
+   <insert id="insertObject"
+           parameterType="com.cy.pj.sys.entity.SysRole">
+       <selectKey keyProperty="id" 
+                  order="BEFORE"
+                  resultType="int">
+            select ceil(rand()*1000000)
+       </selectKey>
+       insert into sys_roles
+       (id,name,note,createdUser,createdTime,modifiedUser,modifiedTime)
+       values
+       (#{id},#{name},#{note},#{createdUser},now(),#{modifiedUser},now())        
+   </insert>
+    -->
+    <!-- sql元素用于对共性进行提取 -->
+    <sql id="queryWhereId">
+         from sys_roles
+         <where>
+            <if test="name!=null and name!=''">
+              name like concat("%",#{name},"%")
+            </if>
+         </where>
+    </sql>
+    <!-- 基于条件统计记录总数 -->
+    <select id="getRowCount" resultType="int">
+         select count(*)
+         <include refid="queryWhereId"/>
+    </select>
+    <!-- 基于条件查询当前页记录 
+         每个SQL元素信息都会封装为一个MappedStatement对象-->
+    <select id="findPageObjects"
+            resultType="com.cy.pj.sys.entity.SysRole">
+          select *
+          <include refid="queryWhereId"/>
+          order by createdTime desc
+          limit #{startIndex},#{pageSize} 
+    </select>
+</mapper>

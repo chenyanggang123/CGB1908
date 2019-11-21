@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<h1>Goods Ajax Pages</h1>
+	<table>
+		<thead>
+			<tr>
+				<th>id</th>
+				<th>name</th>
+				<th>remark</th>
+				<th>createdTime</th>
+			</tr>
+		</thead>
+		<tbody id="tbodyId">
+			<tr><td colspan="4">data loading...</td></tr>
+		</tbody>
+	</table>
+	<script type="text/javascript">
+	function ajaxGet(){
+		//页面加载完成向服务器再次发起请求，获取服务端数
+		//1.构建XHR对象
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange=function(){//callback
+			//readyState==4表示通讯结束
+			//status==20表示服务器响应OK
+			if(xhr.readyState==4&&xhr.status==200){
+				//responseText表示服务端响应的结果
+				//console.log(xhr.responseText);//json格式字符串
+				//将服务器端响应的json格式字符串，转换成json格式字符串
+				var result = JSON.parse(xhr.responseText);
+				doHandleResponseResult(xhr.responseText);
+			}
+		}
+		//2.建立连接
+		var url="doFindObjects"
+		xhr.open("GET",url,true);//true代表异步
+		//3.发送请求
+		xhr.send(null);//get请求send、方法内部不传参数
+		}
+		//处理响应结果
+		function doHandleResponseResult(result){
+			console.log(result);
+			//1.获得tbody对象，清空原有内容
+			var tBody=document.getElementById("tbodyId");
+			tBody.innerHTML="";
+			//2.迭代result记录，并将记录呈现在tbody位置
+			for(var i=0;i<result.length;i++){
+				//2.1构建tr对象
+				var tr=document.createElement("tr");
+				//2.2构建td对象，并追加到tr中
+				var td=document.createElement("td");
+				td.innerText=result[i].id;
+				tr.appendChild(td);
+				
+				td=document.createElement("td");
+				td.innerText=result[i].name;
+				tr.appendChild(td);
+				
+				td=document.createElement("td");
+				td.innerText=result[i].remark;
+				tr.appendChild(td);
+				
+				td=document.createElement("td");
+				td.innerText=result[i].createdTime;
+				tr.appendChild(td);
+				//2.3将tr对象追加到tbody中
+				tBody.appendChild(tr);
+			}
+		}
+		ajaxGet("doFindObjects",doHandleResponseResult);
+	</script>
+</body>
+</html>

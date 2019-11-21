@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<h1>Goods Ajax Pages</h1>
+	<table>
+		<thead>
+			<tr>
+				<th>id</th>
+				<th>name</th>
+				<th>remark</th>
+				<th>createdTime</th>
+			</tr>
+		</thead>
+		<tbody id="tbodyId">
+			<tr><td colspan="4">data loading...</td></tr>
+		</tbody>
+	</table>
+	<!-- JS中问题解决方案（断点，console.log(),排除法） -->
+	<script type="text/javascript" src="../js/ajax.js"></script>
+	<script type="text/javascript">
+		//处理响应结果
+		function doHandleResponseResult(result){
+			//console.log(result);
+			//1.获得tbody对象，清空原有内容
+			var tBody=document.getElementById("tbodyId");
+			tBody.innerHTML="";
+			//2.迭代result记录，并将记录呈现在tbody位置
+			for(var i=0;i<result.length;i++){
+				//2.1构建tr对象
+				var tr=document.createElement("tr");
+				//2.2构建td对象，并追加到tr中
+				doCreatedTds(tr,result[i]);
+				//2.3将tr对象追加到tbody中
+				tBody.appendChild(tr);
+			}
+		}
+		function doCreatedTds(tr,row){
+			var td=document.createElement("td");
+			td.innerText=row.id;
+			tr.appendChild(td);
+			
+			td=document.createElement("td");
+			td.innerText=row.name;
+			tr.appendChild(td);
+			
+			td=document.createElement("td");
+			td.innerText=row.remark;
+			tr.appendChild(td);
+			
+			td=document.createElement("td");
+			td.innerText=row.createdTime;
+			tr.appendChild(td);
+		}
+		ajaxGet("doFindObjects",doHandleResponseResult);
+	</script>
+</body>
+</html>

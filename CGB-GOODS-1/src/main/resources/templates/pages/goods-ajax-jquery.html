@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<h1>渐行渐远</h1>
+	<table>
+		<thead>
+			<tr>
+				<th>id</th>
+				<th>name</th>
+				<th>remark</th>
+				<th>createdTime</th>
+			</tr>
+		</thead>
+		<tbody id="tbodyId">
+			<tr><td colspan="4">data loading...</td></tr>
+		</tbody>
+	</table>
+	<script type="text/javascript" src="../js/jquery.min.js"></script>
+	<script type="text/javascript" >
+		//jquery中的ajax函数
+		//语法$.ajax({type:type,url:url,success:callback})
+		var params={"pageCurrent":1};
+		var url="doFindObjects";
+		$.ajax({
+			type:"GET",
+			url:"doFindObjects",
+			dataType:"json",
+			success:function(result){//result用于接
+				console.log("ajax",result);
+			}
+		});//封装XMLHttpRequest对象发送异步请求的过程
+		//jquery中get函数（ajax get请求）
+		$.get("doFindObjects",function(result){
+			console.log("get",result)
+		},"JSON");
+		//jquery中get函数（ajax get请求）
+		$.getJSON("doFindObjects",function(result){
+			console.log("getJSON",result)
+		},"JSON");
+		//jquery中get函数（ajax get请求）
+		$.post("doFindObjects",function(result){
+			console.log("get",result)
+		});
+	</script>
+</body>
+</html>

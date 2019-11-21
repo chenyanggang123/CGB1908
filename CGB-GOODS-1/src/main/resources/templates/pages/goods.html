@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<h1>Goods Page</h1>
+	<table>
+		<thead>
+			<tr>
+				<th>id</th>
+				<th>name</th>
+			</tr>
+		</thead>
+			<tbody>
+			<tr th:each="g:${goods}">
+				<td th:text=${g.id}/>
+				<td th:text=${g.name}/>
+				<td th:text=${g.remark}/>
+				<td th:text="${#dates.format(g.createdTime,'yyyy/mm/dd HH:mm:ss')}"/>
+			</tr>
+			</tbody>
+			<tfoot>
+				<tr><td>123456</td></tr>
+			</tfoot>
+	</table>
+</body>
+</html>

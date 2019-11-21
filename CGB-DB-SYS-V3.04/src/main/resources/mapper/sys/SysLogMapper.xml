@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cy.pj.sys.dao.SysLogDao">
+   <insert id="insertObject">
+       insert into sys_logs
+       (username,operation,method,params,time,ip,createdTime)
+       values
+       (#{username},#{operation},#{method},#{params},#{time},#{ip},#{createdTime})
+    </insert>
+   
+   <!-- 执行删除操作 (基本业务实现,但是ids的长度为0的时可能出现SQL异常)-->
+     <!-- 
+     <delete id="deleteObjects">
+        delete from sys_logs
+        where id in
+        <foreach collection="ids"
+                 open="("
+                 close=")"
+                 separator=","
+                 item="id">
+                 #{id}
+        </foreach>
+     </delete>
+      -->
+    <!-- 从可靠性角度优化如上删除操作的实现 -->
+    <!-- 
+    <delete id="deleteObjects">
+        delete from sys_logs
+        <if test="ids!=null and ids.length>0">
+          where id in  
+            <foreach collection="ids"
+                 open="("
+                 close=")"
+                 separator=","
+                 item="id">
+                 #{id}
+            </foreach>
+        </if>
+        <if test="ids==null or ids.length==0">
+           where id=-1
+        </if>
+    </delete>
+   -->
+    <!-- 从SQL优化角度,一般在SQL语句中不建议使用in表达式 -->
+    <delete id="deleteObjects">
+       delete from sys_logs
+       <choose>
+         <when test="ids!=null and ids.length>0">
+           <where>
+              <foreach collection="ids"
+                       item="id"
+                       separator="or">
+                  id=#{id}
+              </foreach>
+           </where>
+         </when>
+         <otherwise>
+          where id=-1
+         </otherwise>
+       </choose>
+    </delete>
+    <!-- sql元素用于对共性进行提取 -->
+    <sql id="queryWhereId">
+         from sys_logs
+         <where>
+            <if test="username!=null and username!=''">
+              username like concat("%",#{username},"%")
+            </if>
+         </where>
+    </sql>
+    <!-- 基于条件统计记录总数 -->
+    <select id="getRowCount" resultType="int">
+         select count(*)
+         <include refid="queryWhereId"/>
+    </select>
+    <!-- 基于条件查询当前页记录 
+         每个SQL元素信息都会封装为一个MappedStatement对象-->
+    <select id="findPageObjects"
+            resultType="com.cy.pj.sys.entity.SysLog">
+          select *
+          <include refid="queryWhereId"/>
+          order by createdTime desc
+          limit #{startIndex},#{pageSize} 
+    </select>
+</mapper>
